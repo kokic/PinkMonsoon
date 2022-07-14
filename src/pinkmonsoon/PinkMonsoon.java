@@ -21,7 +21,7 @@ public final class PinkMonsoon {
 
 //
 
-    public static final Morph<String, Boolean> morphBooleanFromString = 
+    public static final Morph<String, Boolean> morphBoolFromString = 
         x -> Boolean.valueOf(x);
     
 }
