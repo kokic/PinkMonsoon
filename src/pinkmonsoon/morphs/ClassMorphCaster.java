@@ -1,15 +1,19 @@
 package pinkmonsoon.morphs;
 
+import static aira.Prelude.arr;
+import static aira.Prelude.foreach;
+import static aira.Prelude.pack;
+import static aira.Prelude.switchIt;
+import static aira.Prelude.trial;
+import static aira.Prelude.trialEval;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.HashMap;
 
-import static aira.Prelude.*;
-import aira.Prelude.Map;
-import aira.quasi.Unsafe;
 import aira.quasi.QuasiFunction.one_t;
 import aira.quasi.QuasiFunction.two_t;
+import aira.quasi.Unsafe;
 import pinkmonsoon.Morph;
 
 public final class ClassMorphCaster {
@@ -41,13 +45,15 @@ public final class ClassMorphCaster {
                 var matched = offsetX == offsetY && typeX == typeY;
                 if (!matched) continue;
                 result.put(xs[i], ys[j]);
+                xs[i].setAccessible(true);
+                ys[j].setAccessible(true);
             }
         }
         return result;
     };
 
-
-    public static final one_t<Class<?>, Constructor> simplestConstruction = x -> {
+    interface SimplestConstruction extends one_t<Class<?>, Constructor<?>> {}
+    public static final SimplestConstruction simplestCons = x -> {
         var constructors = x.getDeclaredConstructors();
         Constructor<?> constructor = constructors[0];
         int simplestCount = constructor.getParameterCount();
@@ -61,25 +67,23 @@ public final class ClassMorphCaster {
         return constructor;
     };
 
-    public static final <X, Y> Morph<X, Y> alignCast(Class<X> clazzX, Class<Y> clazzY) {
+    public static final <X, Y> Morph<X, Y> cast(Class<X> clazzX, Class<Y> clazzY) {
         
         var fieldsX = clazzX.getDeclaredFields();
         var fieldsY = clazzY.getDeclaredFields();
 
-        final var constructor = simplestConstruction.invoke(clazzY); 
-        Y instance = Unsafe.as(eval.invoke(() -> constructor.newInstance()));
-
+        final var constructor = simplestCons.invoke(clazzY);
+        constructor.setAccessible(true);
+        var instance = Unsafe.<Y>as(trialEval.invoke(() -> constructor.newInstance()));
         var hashmap = fieldsMatch.invoke(fieldsY, fieldsX);
-
-
-        Morph<X, Y> morph = x -> instance;
-
-        for (var elem : hashmap.keySet()) {
-            System.out.println(elem);
-            // elem.set(instance, hashmap.get(elem).get(x));
-        }
-
-        return null;
+        var preloop = foreach.invoke(hashmap.keySet().toArray());
+ 
+        Morph<X, Y> morph = x -> ((two_t<Object, Y, Y>) (code, u) -> u)
+            .invoke(pack.invoke(() -> preloop.invoke(elem -> trial
+            .invoke(() -> ((Field) elem).set(instance, hashmap
+            .get(elem).get(x))))), instance);
+        
+        return morph;
     }
 
 }

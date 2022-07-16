@@ -1,19 +1,18 @@
 
 import static aira.Prelude.println;
+import static pinkmonsoon.TypePredicator.isBinInt;
+import static pinkmonsoon.TypePredicator.isDecimalFrac;
+import static pinkmonsoon.TypePredicator.isDecimalInt;
+import static pinkmonsoon.TypePredicator.isHexInt;
 
 import pinkmonsoon.PinkMonsoon;
 import pinkmonsoon.morphs.ClassMorphCaster;
-
-import static pinkmonsoon.TypePredicator.*;
-
-import aira.Prelude;
-import aira.quasi.QuasiFunction;
 
 public class App {
 
     static class A {
         int off4;
-        byte off5;
+        byte off5 = -11;
         byte off6;
         byte byte7;
     }
@@ -29,10 +28,10 @@ public class App {
         
         A a = new A(); 
         
-        var caster = ClassMorphCaster.alignCast(A.class, B.class);
-        
-        // caster.map(a);
+        var caster = ClassMorphCaster.cast(A.class, B.class);
+        B b = caster.map(a);
 
+        System.out.println(b.off5);
         // predicatorTest();
         println.invoke("Baby Pink Monsoon!");
     }
