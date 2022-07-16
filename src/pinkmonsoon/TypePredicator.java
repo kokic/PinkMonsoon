@@ -1,14 +1,13 @@
 package pinkmonsoon;
 
-import static aira.Prelude.foldl; 
+import static aira.Prelude.*;
 
+import aira.quasi.QuasiFunction.With;
 import aira.quasi.QuasiFunction.one_bool;
 import aira.quasi.QuasiFunction.one_t;
 import aira.quasi.QuasiFunction.two_t;
 
 public final class TypePredicator {
-
-    public interface With<T> extends two_t<Boolean, T, Boolean> {}
 
     public static final two_t<String, Character, Boolean> isUniqueChar = 
         (xs, x) -> xs.indexOf(x) == xs.lastIndexOf(x);
@@ -21,7 +20,7 @@ public final class TypePredicator {
 
     public static final two_t<one_bool<Character>, String, Boolean> isUnsignedNumberPartial = 
         (f, xs) -> (Boolean) foldl.invoke((With<Character>) (prev, x) -> prev && f.invoke(x), 
-            true, PinkMonsoon.toCharList.invoke(xs));
+            true, toCharList.invoke(xs));
 
     public static final two_t<one_bool<Character>, String, Boolean> isNumberPartial = 
         (f, xs) -> isUnsignedNumberPartial.invoke(f, castUnsigned.invoke(xs));
